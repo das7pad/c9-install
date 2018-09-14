@@ -251,16 +251,24 @@ ensure_local_gyp() {
 }
 
 node(){
-  # clean up 
-  rm -rf node 
-  rm -rf node.tar.gz
-  
-  echo :Installing Node $NODE_VERSION
-  
-  DOWNLOAD https://nodejs.org/dist/"$NODE_VERSION/node-$NODE_VERSION-$1-$2.tar.gz" node.tar.gz
-  tar xzf node.tar.gz
-  mv "node-$NODE_VERSION-$1-$2" node
-  rm -f node.tar.gz
+  # clean up
+  rm -rf node
+
+  if [[ -d "$HOME/.nvm" ]]; then
+    source "$HOME/.nvm/nvm.sh"
+    nvm install "$NODE_VERSION"
+
+    mkdir -p `dirname "$NODE"`
+    ln -sf `which npm` "$NPM"
+    ln -sf `which node` "$NODE"
+  else
+    echo :Installing Node $NODE_VERSION
+
+    DOWNLOAD https://nodejs.org/dist/"$NODE_VERSION/node-$NODE_VERSION-$1-$2.tar.gz" node.tar.gz
+    tar xzf node.tar.gz
+    mv "node-$NODE_VERSION-$1-$2" node
+    rm -f node.tar.gz
+  fi
 
   # use local npm cache
   "$NPM" config -g set cache  "$C9_DIR/tmp/.npm"
